@@ -1,20 +1,44 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import axios from 'axios';
+import ProductDetail from './ProductDetail';
+import ProductList from './ProductList';
 
-export default function App() {
+const Stack = createStackNavigator();
+
+function App() {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const apiURL = 'https://fakestoreapi.com/products';
+
+    // Solicitud GET API
+    axios
+      .get(apiURL)
+      .then((response) => {
+        setData(response.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching data: ', error);
+      });
+  }, []);
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen
+          name='ProductList'
+          options={{ title: 'Lista de productos' }}
+        >
+          {({ navigation }) => (
+            <ProductList data={data} navigation={navigation} />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name='ProductDetail' component={ProductDetail} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;
